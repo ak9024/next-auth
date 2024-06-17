@@ -67,17 +67,20 @@ export const login = async (
   _: FormState,
   formData: FormData,
 ): Promise<FormState> => {
+  // 1. Validate fields
   const validateFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
 
+  //  if any error in validation process
   if (!validateFields.success) {
     return {
       errors: validateFields.error.flatten().fieldErrors,
     };
   }
 
+  // 2. find data from db to compare with payload
   const user = await db.query.users.findFirst({
     where: eq(users.email, validateFields.data.email),
   });
@@ -99,6 +102,7 @@ export const login = async (
     };
   }
 
+  // 3. create and insert session
   const userId = user.id.toString();
   await createSession(userId);
 };
