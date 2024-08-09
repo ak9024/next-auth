@@ -11,21 +11,18 @@ export const signup = async (
   _: FormState,
   formData: FormData,
 ): Promise<FormState> => {
-  // 1. validate fields
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData?.get("name"),
     email: formData?.get("email"),
     password: formData?.get("password"),
   });
 
-  // if any form fields are invalid, return earyly
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
 
-  // 2. prepare data for insertation
   const { name, email, password } = validatedFields?.data;
 
   const existingUser = await db.query.users.findFirst({
@@ -38,10 +35,8 @@ export const signup = async (
     };
   }
 
-  // hash the user password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 3. insert the user password
   const data = await db
     .insert(users)
     .values({
